@@ -82,7 +82,7 @@ class Datagrid(SyncAPIClient):
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `bearer_token` from `BEARER_TOKEN`
-        - `api_key` from `API_KEY`
+        - `api_key` from `DATAGRID_API_KEY`
         """
         if bearer_token is None:
             bearer_token = os.environ.get("BEARER_TOKEN")
@@ -93,10 +93,10 @@ class Datagrid(SyncAPIClient):
         self.bearer_token = bearer_token
 
         if api_key is None:
-            api_key = os.environ.get("API_KEY")
+            api_key = os.environ.get("DATAGRID_API_KEY")
         if api_key is None:
             raise DatagridError(
-                "The api_key client option must be set either by passing api_key to the client or by setting the API_KEY environment variable"
+                "The api_key client option must be set either by passing api_key to the client or by setting the DATAGRID_API_KEY environment variable"
             )
         self.api_key = api_key
 
@@ -277,7 +277,7 @@ class AsyncDatagrid(AsyncAPIClient):
 
         This automatically infers the following arguments from their corresponding environment variables if they are not provided:
         - `bearer_token` from `BEARER_TOKEN`
-        - `api_key` from `API_KEY`
+        - `api_key` from `DATAGRID_API_KEY`
         """
         if bearer_token is None:
             bearer_token = os.environ.get("BEARER_TOKEN")
@@ -288,10 +288,10 @@ class AsyncDatagrid(AsyncAPIClient):
         self.bearer_token = bearer_token
 
         if api_key is None:
-            api_key = os.environ.get("API_KEY")
+            api_key = os.environ.get("DATAGRID_API_KEY")
         if api_key is None:
             raise DatagridError(
-                "The api_key client option must be set either by passing api_key to the client or by setting the API_KEY environment variable"
+                "The api_key client option must be set either by passing api_key to the client or by setting the DATAGRID_API_KEY environment variable"
             )
         self.api_key = api_key
 
