@@ -2,7 +2,7 @@ import operator
 from typing import Any
 from typing_extensions import override
 
-from datagrid._utils import LazyProxy
+from datagrid_ai._utils import LazyProxy
 
 
 class RecursiveLazyProxy(LazyProxy[Any]):

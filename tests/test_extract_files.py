@@ -4,8 +4,8 @@ from typing import Sequence
 
 import pytest
 
-from datagrid._types import FileTypes
-from datagrid._utils import extract_files
+from datagrid_ai._types import FileTypes
+from datagrid_ai._utils import extract_files
 
 
 def test_removes_files_from_input() -> None:

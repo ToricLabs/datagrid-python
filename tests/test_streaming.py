@@ -5,8 +5,8 @@ from typing import Iterator, AsyncIterator
 import httpx
 import pytest
 
-from datagrid import Datagrid, AsyncDatagrid
-from datagrid._streaming import Stream, AsyncStream, ServerSentEvent
+from datagrid_ai import Datagrid, AsyncDatagrid
+from datagrid_ai._streaming import Stream, AsyncStream, ServerSentEvent
 
 
 @pytest.mark.asyncio
