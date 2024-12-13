@@ -7,9 +7,9 @@ import pytest
 import pydantic
 from pydantic import Field
 
-from datagrid._utils import PropertyInfo
-from datagrid._compat import PYDANTIC_V2, parse_obj, model_dump, model_json
-from datagrid._models import BaseModel, construct_type
+from datagrid_ai._utils import PropertyInfo
+from datagrid_ai._compat import PYDANTIC_V2, parse_obj, model_dump, model_json
+from datagrid_ai._models import BaseModel, construct_type
 
 
 class BasicModel(BaseModel):

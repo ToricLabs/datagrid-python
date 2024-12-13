@@ -7,8 +7,8 @@ from typing_extensions import Literal
 
 import httpx
 
-from ..types import knowledge_list_params, knowledge_create_params
-from .._types import NOT_GIVEN, Body, Query, Headers, NotGiven, FileTypes
+from ..types import knowledge_list_params, knowledge_create_params, knowledge_update_params
+from .._types import NOT_GIVEN, Body, Query, Headers, NoneType, NotGiven, FileTypes
 from .._utils import (
     extract_files,
     maybe_transform,
@@ -23,9 +23,10 @@ from .._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .._base_client import make_request_options
+from ..pagination import SyncCursorPage, AsyncCursorPage
+from .._base_client import AsyncPaginator, make_request_options
 from ..types.knowledge import Knowledge
-from ..types.knowledge_list_response import KnowledgeListResponse
+from ..types.knowledge_update_response import KnowledgeUpdateResponse
 
 __all__ = ["KnowledgeResource", "AsyncKnowledgeResource"]
 
@@ -93,6 +94,70 @@ class KnowledgeResource(SyncAPIResource):
             cast_to=Knowledge,
         )
 
+    def retrieve(
+        self,
+        knowledge_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> Knowledge:
+        """
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not knowledge_id:
+            raise ValueError(f"Expected a non-empty value for `knowledge_id` but received {knowledge_id!r}")
+        return self._get(
+            f"/v1/knowledge/{knowledge_id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Knowledge,
+        )
+
+    def update(
+        self,
+        knowledge_id: str,
+        *,
+        name: str,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> KnowledgeUpdateResponse:
+        """
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not knowledge_id:
+            raise ValueError(f"Expected a non-empty value for `knowledge_id` but received {knowledge_id!r}")
+        return self._patch(
+            f"/v1/knowledge/{knowledge_id}",
+            body=maybe_transform({"name": name}, knowledge_update_params.KnowledgeUpdateParams),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=KnowledgeUpdateResponse,
+        )
+
     def list(
         self,
         *,
@@ -106,7 +171,7 @@ class KnowledgeResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> KnowledgeListResponse:
+    ) -> SyncCursorPage[Knowledge]:
         """
         Args:
           extra_headers: Send extra headers
@@ -117,8 +182,9 @@ class KnowledgeResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get(
+        return self._get_api_list(
             "/v1/knowledge",
+            page=SyncCursorPage[Knowledge],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -134,7 +200,39 @@ class KnowledgeResource(SyncAPIResource):
                     knowledge_list_params.KnowledgeListParams,
                 ),
             ),
-            cast_to=KnowledgeListResponse,
+            model=Knowledge,
+        )
+
+    def delete(
+        self,
+        knowledge_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> None:
+        """
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not knowledge_id:
+            raise ValueError(f"Expected a non-empty value for `knowledge_id` but received {knowledge_id!r}")
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        return self._delete(
+            f"/v1/knowledge/{knowledge_id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=NoneType,
         )
 
 
@@ -201,7 +299,71 @@ class AsyncKnowledgeResource(AsyncAPIResource):
             cast_to=Knowledge,
         )
 
-    async def list(
+    async def retrieve(
+        self,
+        knowledge_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> Knowledge:
+        """
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not knowledge_id:
+            raise ValueError(f"Expected a non-empty value for `knowledge_id` but received {knowledge_id!r}")
+        return await self._get(
+            f"/v1/knowledge/{knowledge_id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Knowledge,
+        )
+
+    async def update(
+        self,
+        knowledge_id: str,
+        *,
+        name: str,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> KnowledgeUpdateResponse:
+        """
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not knowledge_id:
+            raise ValueError(f"Expected a non-empty value for `knowledge_id` but received {knowledge_id!r}")
+        return await self._patch(
+            f"/v1/knowledge/{knowledge_id}",
+            body=await async_maybe_transform({"name": name}, knowledge_update_params.KnowledgeUpdateParams),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=KnowledgeUpdateResponse,
+        )
+
+    def list(
         self,
         *,
         direction: Literal["asc", "desc"] | NotGiven = NOT_GIVEN,
@@ -214,7 +376,7 @@ class AsyncKnowledgeResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> KnowledgeListResponse:
+    ) -> AsyncPaginator[Knowledge, AsyncCursorPage[Knowledge]]:
         """
         Args:
           extra_headers: Send extra headers
@@ -225,14 +387,15 @@ class AsyncKnowledgeResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return await self._get(
+        return self._get_api_list(
             "/v1/knowledge",
+            page=AsyncCursorPage[Knowledge],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
+                query=maybe_transform(
                     {
                         "direction": direction,
                         "limit": limit,
@@ -242,7 +405,39 @@ class AsyncKnowledgeResource(AsyncAPIResource):
                     knowledge_list_params.KnowledgeListParams,
                 ),
             ),
-            cast_to=KnowledgeListResponse,
+            model=Knowledge,
+        )
+
+    async def delete(
+        self,
+        knowledge_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
+    ) -> None:
+        """
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not knowledge_id:
+            raise ValueError(f"Expected a non-empty value for `knowledge_id` but received {knowledge_id!r}")
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        return await self._delete(
+            f"/v1/knowledge/{knowledge_id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=NoneType,
         )
 
 
@@ -253,8 +448,17 @@ class KnowledgeResourceWithRawResponse:
         self.create = to_raw_response_wrapper(
             knowledge.create,
         )
+        self.retrieve = to_raw_response_wrapper(
+            knowledge.retrieve,
+        )
+        self.update = to_raw_response_wrapper(
+            knowledge.update,
+        )
         self.list = to_raw_response_wrapper(
             knowledge.list,
+        )
+        self.delete = to_raw_response_wrapper(
+            knowledge.delete,
         )
 
 
@@ -265,8 +469,17 @@ class AsyncKnowledgeResourceWithRawResponse:
         self.create = async_to_raw_response_wrapper(
             knowledge.create,
         )
+        self.retrieve = async_to_raw_response_wrapper(
+            knowledge.retrieve,
+        )
+        self.update = async_to_raw_response_wrapper(
+            knowledge.update,
+        )
         self.list = async_to_raw_response_wrapper(
             knowledge.list,
+        )
+        self.delete = async_to_raw_response_wrapper(
+            knowledge.delete,
         )
 
 
@@ -277,8 +490,17 @@ class KnowledgeResourceWithStreamingResponse:
         self.create = to_streamed_response_wrapper(
             knowledge.create,
         )
+        self.retrieve = to_streamed_response_wrapper(
+            knowledge.retrieve,
+        )
+        self.update = to_streamed_response_wrapper(
+            knowledge.update,
+        )
         self.list = to_streamed_response_wrapper(
             knowledge.list,
+        )
+        self.delete = to_streamed_response_wrapper(
+            knowledge.delete,
         )
 
 
@@ -289,6 +511,15 @@ class AsyncKnowledgeResourceWithStreamingResponse:
         self.create = async_to_streamed_response_wrapper(
             knowledge.create,
         )
+        self.retrieve = async_to_streamed_response_wrapper(
+            knowledge.retrieve,
+        )
+        self.update = async_to_streamed_response_wrapper(
+            knowledge.update,
+        )
         self.list = async_to_streamed_response_wrapper(
             knowledge.list,
+        )
+        self.delete = async_to_streamed_response_wrapper(
+            knowledge.delete,
         )

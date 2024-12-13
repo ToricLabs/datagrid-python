@@ -20,12 +20,12 @@ import pytest
 from respx import MockRouter
 from pydantic import ValidationError
 
-from datagrid import Datagrid, AsyncDatagrid, APIResponseValidationError
-from datagrid._types import Omit
-from datagrid._models import BaseModel, FinalRequestOptions
-from datagrid._constants import RAW_RESPONSE_HEADER
-from datagrid._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
-from datagrid._base_client import (
+from datagrid_ai import Datagrid, AsyncDatagrid, APIResponseValidationError
+from datagrid_ai._types import Omit
+from datagrid_ai._models import BaseModel, FinalRequestOptions
+from datagrid_ai._constants import RAW_RESPONSE_HEADER
+from datagrid_ai._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
+from datagrid_ai._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
     BaseClient,
@@ -242,10 +242,10 @@ class TestDatagrid:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "datagrid/_legacy_response.py",
-                        "datagrid/_response.py",
+                        "datagrid_ai/_legacy_response.py",
+                        "datagrid_ai/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
-                        "datagrid/_compat.py",
+                        "datagrid_ai/_compat.py",
                         # Standard library leaks we don't care about.
                         "/logging/__init__.py",
                     ]
@@ -776,7 +776,7 @@ class TestDatagrid:
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/knowledge").mock(side_effect=httpx.TimeoutException("Test timeout error"))
@@ -784,14 +784,14 @@ class TestDatagrid:
         with pytest.raises(APITimeoutError):
             self.client.post(
                 "/v1/knowledge",
-                body=cast(object, dict(files=None)),
+                body=cast(object, dict(files=[b"raw file contents"])),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
 
         assert _get_open_connections(self.client) == 0
 
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/knowledge").mock(return_value=httpx.Response(500))
@@ -799,7 +799,7 @@ class TestDatagrid:
         with pytest.raises(APIStatusError):
             self.client.post(
                 "/v1/knowledge",
-                body=cast(object, dict(files=None)),
+                body=cast(object, dict(files=[b"raw file contents"])),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
@@ -807,7 +807,7 @@ class TestDatagrid:
         assert _get_open_connections(self.client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     def test_retries_taken(
@@ -838,7 +838,7 @@ class TestDatagrid:
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_omit_retry_count_header(
         self, client: Datagrid, failures_before_success: int, respx_mock: MockRouter
@@ -863,7 +863,7 @@ class TestDatagrid:
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_overwrite_retry_count_header(
         self, client: Datagrid, failures_before_success: int, respx_mock: MockRouter
@@ -1077,10 +1077,10 @@ class TestAsyncDatagrid:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "datagrid/_legacy_response.py",
-                        "datagrid/_response.py",
+                        "datagrid_ai/_legacy_response.py",
+                        "datagrid_ai/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
-                        "datagrid/_compat.py",
+                        "datagrid_ai/_compat.py",
                         # Standard library leaks we don't care about.
                         "/logging/__init__.py",
                     ]
@@ -1615,7 +1615,7 @@ class TestAsyncDatagrid:
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/knowledge").mock(side_effect=httpx.TimeoutException("Test timeout error"))
@@ -1623,14 +1623,14 @@ class TestAsyncDatagrid:
         with pytest.raises(APITimeoutError):
             await self.client.post(
                 "/v1/knowledge",
-                body=cast(object, dict(files=None)),
+                body=cast(object, dict(files=[b"raw file contents"])),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
 
         assert _get_open_connections(self.client) == 0
 
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter) -> None:
         respx_mock.post("/v1/knowledge").mock(return_value=httpx.Response(500))
@@ -1638,7 +1638,7 @@ class TestAsyncDatagrid:
         with pytest.raises(APIStatusError):
             await self.client.post(
                 "/v1/knowledge",
-                body=cast(object, dict(files=None)),
+                body=cast(object, dict(files=[b"raw file contents"])),
                 cast_to=httpx.Response,
                 options={"headers": {RAW_RESPONSE_HEADER: "stream"}},
             )
@@ -1646,7 +1646,7 @@ class TestAsyncDatagrid:
         assert _get_open_connections(self.client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
@@ -1678,7 +1678,7 @@ class TestAsyncDatagrid:
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
     async def test_omit_retry_count_header(
@@ -1704,7 +1704,7 @@ class TestAsyncDatagrid:
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("datagrid._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("datagrid_ai._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
     async def test_overwrite_retry_count_header(
@@ -1740,8 +1740,8 @@ class TestAsyncDatagrid:
         import nest_asyncio
         import threading
 
-        from datagrid._utils import asyncify
-        from datagrid._base_client import get_platform 
+        from datagrid_ai._utils import asyncify
+        from datagrid_ai._base_client import get_platform 
 
         async def test_main() -> None:
             result = await asyncify(get_platform)()

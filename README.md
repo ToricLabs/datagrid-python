@@ -1,6 +1,6 @@
 # Datagrid Python API library
 
-[![PyPI version](https://img.shields.io/pypi/v/datagrid.svg)](https://pypi.org/project/datagrid/)
+[![PyPI version](https://img.shields.io/pypi/v/datagrid_ai.svg)](https://pypi.org/project/datagrid_ai/)
 
 The Datagrid Python library provides convenient access to the Datagrid REST API from any Python 3.8+
 application. The library includes type definitions for all request params and response fields,
@@ -20,19 +20,19 @@ pip install git+ssh://git@github.com/stainless-sdks/datagrid-python.git
 ```
 
 > [!NOTE]
-> Once this package is [published to PyPI](https://app.stainlessapi.com/docs/guides/publish), this will become: `pip install --pre datagrid`
+> Once this package is [published to PyPI](https://app.stainlessapi.com/docs/guides/publish), this will become: `pip install --pre datagrid_ai`
 
 ## Usage
 
 The full API of this library can be found in [api.md](api.md).
 
 ```python
-from datagrid import Datagrid
+from datagrid_ai import Datagrid
 
 client = Datagrid()
 
 knowledge = client.knowledge.create(
-    files=None,
+    files=[b"raw file contents"],
 )
 print(knowledge.id)
 ```
@@ -48,14 +48,14 @@ Simply import `AsyncDatagrid` instead of `Datagrid` and use `await` with each AP
 
 ```python
 import asyncio
-from datagrid import AsyncDatagrid
+from datagrid_ai import AsyncDatagrid
 
 client = AsyncDatagrid()
 
 
 async def main() -> None:
     knowledge = await client.knowledge.create(
-        files=None,
+        files=[b"raw file contents"],
     )
     print(knowledge.id)
 
@@ -74,31 +74,94 @@ Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typ
 
 Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
 
-## Handling errors
+## Pagination
 
-When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `datagrid.APIConnectionError` is raised.
+List methods in the Datagrid API are paginated.
 
-When the API returns a non-success status code (that is, 4xx or 5xx
-response), a subclass of `datagrid.APIStatusError` is raised, containing `status_code` and `response` properties.
-
-All errors inherit from `datagrid.APIError`.
+This library provides auto-paginating iterators with each list response, so you do not have to request successive pages manually:
 
 ```python
-import datagrid
-from datagrid import Datagrid
+from datagrid_ai import Datagrid
+
+client = Datagrid()
+
+all_knowledges = []
+# Automatically fetches more pages as needed.
+for knowledge in client.knowledge.list():
+    # Do something with knowledge here
+    all_knowledges.append(knowledge)
+print(all_knowledges)
+```
+
+Or, asynchronously:
+
+```python
+import asyncio
+from datagrid_ai import AsyncDatagrid
+
+client = AsyncDatagrid()
+
+
+async def main() -> None:
+    all_knowledges = []
+    # Iterate through items across all pages, issuing requests as needed.
+    async for knowledge in client.knowledge.list():
+        all_knowledges.append(knowledge)
+    print(all_knowledges)
+
+
+asyncio.run(main())
+```
+
+Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
+
+```python
+first_page = await client.knowledge.list()
+if first_page.has_next_page():
+    print(f"will fetch next page using these details: {first_page.next_page_info()}")
+    next_page = await first_page.get_next_page()
+    print(f"number of items we just fetched: {len(next_page.data)}")
+
+# Remove `await` for non-async usage.
+```
+
+Or just work directly with the returned data:
+
+```python
+first_page = await client.knowledge.list()
+
+print(f"next page cursor: {first_page.next}")  # => "next page cursor: ..."
+for knowledge in first_page.data:
+    print(knowledge.id)
+
+# Remove `await` for non-async usage.
+```
+
+## Handling errors
+
+When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `datagrid_ai.APIConnectionError` is raised.
+
+When the API returns a non-success status code (that is, 4xx or 5xx
+response), a subclass of `datagrid_ai.APIStatusError` is raised, containing `status_code` and `response` properties.
+
+All errors inherit from `datagrid_ai.APIError`.
+
+```python
+import datagrid_ai
+from datagrid_ai import Datagrid
 
 client = Datagrid()
 
 try:
     client.knowledge.create(
-        files=None,
+        files=[b"raw file contents"],
     )
-except datagrid.APIConnectionError as e:
+except datagrid_ai.APIConnectionError as e:
     print("The server could not be reached")
     print(e.__cause__)  # an underlying Exception, likely raised within httpx.
-except datagrid.RateLimitError as e:
+except datagrid_ai.RateLimitError as e:
     print("A 429 status code was received; we should back off a bit.")
-except datagrid.APIStatusError as e:
+except datagrid_ai.APIStatusError as e:
     print("Another non-200-range status code was received")
     print(e.status_code)
     print(e.response)
@@ -126,7 +189,7 @@ Connection errors (for example, due to a network connectivity problem), 408 Requ
 You can use the `max_retries` option to configure or disable retry settings:
 
 ```python
-from datagrid import Datagrid
+from datagrid_ai import Datagrid
 
 # Configure the default for all requests:
 client = Datagrid(
@@ -136,7 +199,7 @@ client = Datagrid(
 
 # Or, configure per-request:
 client.with_options(max_retries=5).knowledge.create(
-    files=None,
+    files=[b"raw file contents"],
 )
 ```
 
@@ -146,7 +209,7 @@ By default requests time out after 1 minute. You can configure this with a `time
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/#fine-tuning-the-configuration) object:
 
 ```python
-from datagrid import Datagrid
+from datagrid_ai import Datagrid
 
 # Configure the default for all requests:
 client = Datagrid(
@@ -161,7 +224,7 @@ client = Datagrid(
 
 # Override per-request:
 client.with_options(timeout=5.0).knowledge.create(
-    files=None,
+    files=[b"raw file contents"],
 )
 ```
 
@@ -200,11 +263,11 @@ if response.my_field is None:
 The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
 
 ```py
-from datagrid import Datagrid
+from datagrid_ai import Datagrid
 
 client = Datagrid()
 response = client.knowledge.with_raw_response.create(
-    files=None,
+    files=[b'raw file contents'],
 )
 print(response.headers.get('X-My-Header'))
 
@@ -212,9 +275,9 @@ knowledge = response.parse()  # get the object that `knowledge.create()` would h
 print(knowledge.id)
 ```
 
-These methods return an [`APIResponse`](https://github.com/stainless-sdks/datagrid-python/tree/main/src/datagrid/_response.py) object.
+These methods return an [`APIResponse`](https://github.com/stainless-sdks/datagrid-python/tree/main/src/datagrid_ai/_response.py) object.
 
-The async client returns an [`AsyncAPIResponse`](https://github.com/stainless-sdks/datagrid-python/tree/main/src/datagrid/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
+The async client returns an [`AsyncAPIResponse`](https://github.com/stainless-sdks/datagrid-python/tree/main/src/datagrid_ai/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
 
 #### `.with_streaming_response`
 
@@ -224,7 +287,7 @@ To stream the response body, use `.with_streaming_response` instead, which requi
 
 ```python
 with client.knowledge.with_streaming_response.create(
-    files=None,
+    files=[b"raw file contents"],
 ) as response:
     print(response.headers.get("X-My-Header"))
 
@@ -279,7 +342,7 @@ You can directly override the [httpx client](https://www.python-httpx.org/api/#c
 
 ```python
 import httpx
-from datagrid import Datagrid, DefaultHttpxClient
+from datagrid_ai import Datagrid, DefaultHttpxClient
 
 client = Datagrid(
     # Or use the `DATAGRID_BASE_URL` env var
@@ -320,8 +383,8 @@ If you've upgraded to the latest version but aren't seeing any new features you 
 You can determine the version that is being used at runtime with:
 
 ```py
-import datagrid
-print(datagrid.__version__)
+import datagrid_ai
+print(datagrid_ai.__version__)
 ```
 
 ## Requirements
