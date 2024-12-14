@@ -8,7 +8,7 @@ from typing_extensions import Self, override
 
 import httpx
 
-from . import resources, _exceptions
+from . import _exceptions
 from ._qs import Querystring
 from ._types import (
     NOT_GIVEN,
@@ -24,6 +24,7 @@ from ._utils import (
     get_async_library,
 )
 from ._version import __version__
+from .resources import knowledge
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import DatagridError, APIStatusError
 from ._base_client import (
@@ -37,7 +38,6 @@ __all__ = [
     "Transport",
     "ProxiesTypes",
     "RequestOptions",
-    "resources",
     "Datagrid",
     "AsyncDatagrid",
     "Client",
@@ -46,7 +46,7 @@ __all__ = [
 
 
 class Datagrid(SyncAPIClient):
-    knowledge: resources.KnowledgeResource
+    knowledge: knowledge.KnowledgeResource
     with_raw_response: DatagridWithRawResponse
     with_streaming_response: DatagridWithStreamedResponse
 
@@ -116,7 +116,7 @@ class Datagrid(SyncAPIClient):
             _strict_response_validation=_strict_response_validation,
         )
 
-        self.knowledge = resources.KnowledgeResource(self)
+        self.knowledge = knowledge.KnowledgeResource(self)
         self.with_raw_response = DatagridWithRawResponse(self)
         self.with_streaming_response = DatagridWithStreamedResponse(self)
 
@@ -241,7 +241,7 @@ class Datagrid(SyncAPIClient):
 
 
 class AsyncDatagrid(AsyncAPIClient):
-    knowledge: resources.AsyncKnowledgeResource
+    knowledge: knowledge.AsyncKnowledgeResource
     with_raw_response: AsyncDatagridWithRawResponse
     with_streaming_response: AsyncDatagridWithStreamedResponse
 
@@ -311,7 +311,7 @@ class AsyncDatagrid(AsyncAPIClient):
             _strict_response_validation=_strict_response_validation,
         )
 
-        self.knowledge = resources.AsyncKnowledgeResource(self)
+        self.knowledge = knowledge.AsyncKnowledgeResource(self)
         self.with_raw_response = AsyncDatagridWithRawResponse(self)
         self.with_streaming_response = AsyncDatagridWithStreamedResponse(self)
 
@@ -437,22 +437,22 @@ class AsyncDatagrid(AsyncAPIClient):
 
 class DatagridWithRawResponse:
     def __init__(self, client: Datagrid) -> None:
-        self.knowledge = resources.KnowledgeResourceWithRawResponse(client.knowledge)
+        self.knowledge = knowledge.KnowledgeResourceWithRawResponse(client.knowledge)
 
 
 class AsyncDatagridWithRawResponse:
     def __init__(self, client: AsyncDatagrid) -> None:
-        self.knowledge = resources.AsyncKnowledgeResourceWithRawResponse(client.knowledge)
+        self.knowledge = knowledge.AsyncKnowledgeResourceWithRawResponse(client.knowledge)
 
 
 class DatagridWithStreamedResponse:
     def __init__(self, client: Datagrid) -> None:
-        self.knowledge = resources.KnowledgeResourceWithStreamingResponse(client.knowledge)
+        self.knowledge = knowledge.KnowledgeResourceWithStreamingResponse(client.knowledge)
 
 
 class AsyncDatagridWithStreamedResponse:
     def __init__(self, client: AsyncDatagrid) -> None:
-        self.knowledge = resources.AsyncKnowledgeResourceWithStreamingResponse(client.knowledge)
+        self.knowledge = knowledge.AsyncKnowledgeResourceWithStreamingResponse(client.knowledge)
 
 
 Client = Datagrid
