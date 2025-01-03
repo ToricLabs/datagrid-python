@@ -27,9 +27,12 @@ pip install git+ssh://git@github.com/stainless-sdks/datagrid-python.git
 The full API of this library can be found in [api.md](api.md).
 
 ```python
+import os
 from datagrid_ai import Datagrid
 
-client = Datagrid()
+client = Datagrid(
+    api_key=os.environ.get("DATAGRID_API_KEY"),  # This is the default and can be omitted
+)
 
 knowledge = client.knowledge.create(
     files=[b"raw file contents"],
@@ -37,20 +40,23 @@ knowledge = client.knowledge.create(
 print(knowledge.id)
 ```
 
-While you can provide a `bearer_token` keyword argument,
+While you can provide an `api_key` keyword argument,
 we recommend using [python-dotenv](https://pypi.org/project/python-dotenv/)
-to add `BEARER_TOKEN="My Bearer Token"` to your `.env` file
-so that your Bearer Token is not stored in source control.
+to add `DATAGRID_API_KEY="My API Key"` to your `.env` file
+so that your API Key is not stored in source control.
 
 ## Async usage
 
 Simply import `AsyncDatagrid` instead of `Datagrid` and use `await` with each API call:
 
 ```python
+import os
 import asyncio
 from datagrid_ai import AsyncDatagrid
 
-client = AsyncDatagrid()
+client = AsyncDatagrid(
+    api_key=os.environ.get("DATAGRID_API_KEY"),  # This is the default and can be omitted
+)
 
 
 async def main() -> None:
@@ -130,7 +136,7 @@ Or just work directly with the returned data:
 ```python
 first_page = await client.knowledge.list()
 
-print(f"next page cursor: {first_page.next}")  # => "next page cursor: ..."
+print(f"next page cursor: {first_page.after}")  # => "next page cursor: ..."
 for knowledge in first_page.data:
     print(knowledge.id)
 
