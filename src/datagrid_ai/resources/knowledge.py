@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import List, Mapping, cast
-from typing_extensions import Literal
 
 import httpx
 
@@ -23,7 +22,7 @@ from .._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ..pagination import SyncCursorPage, AsyncCursorPage
+from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.knowledge import Knowledge
 from ..types.knowledge_update_response import KnowledgeUpdateResponse
@@ -64,7 +63,12 @@ class KnowledgeResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> Knowledge:
         """
+        Create knowledge which will be learned and leveraged by agents.
+
         Args:
+          files: The files to be uploaded and learned. Supported media types are `pdf`, `json`,
+              `csv`, `text`, `png`, `jpeg`, `excel`, `google sheets`.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -106,6 +110,8 @@ class KnowledgeResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> Knowledge:
         """
+        Retrieves a knowledge by id.
+
         Args:
           extra_headers: Send extra headers
 
@@ -138,6 +144,8 @@ class KnowledgeResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> KnowledgeUpdateResponse:
         """
+        Update a knowledge's attributes.
+
         Args:
           extra_headers: Send extra headers
 
@@ -161,19 +169,33 @@ class KnowledgeResource(SyncAPIResource):
     def list(
         self,
         *,
-        direction: Literal["asc", "desc"] | NotGiven = NOT_GIVEN,
+        after: str | NotGiven = NOT_GIVEN,
+        before: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
-        next: str | NotGiven = NOT_GIVEN,
-        sort: Literal["created_at"] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> SyncCursorPage[Knowledge]:
-        """
+    ) -> SyncCursorIDPage[Knowledge]:
+        """Returns the list of knowledge.
+
         Args:
+          after: A cursor to use in pagination.
+
+        `after` is an object ID that defines your place
+              in the list. For example, if you make a list request and receive 100 objects,
+              ending with `obj_foo`, your subsequent call can include `after=obj_foo` to fetch
+              the next page of the list.
+
+          before: A cursor to use in pagination. `before` is an object ID that defines your place
+              in the list. For example, if you make a list request and receive 100 objects,
+              starting with `obj_bar`, your subsequent call can include `before=obj_bar` to
+              fetch the previous page of the list.
+
+          limit: The limit on the number of objects to return, ranging between 1 and 100.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -184,7 +206,7 @@ class KnowledgeResource(SyncAPIResource):
         """
         return self._get_api_list(
             "/v1/knowledge",
-            page=SyncCursorPage[Knowledge],
+            page=SyncCursorIDPage[Knowledge],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -192,10 +214,9 @@ class KnowledgeResource(SyncAPIResource):
                 timeout=timeout,
                 query=maybe_transform(
                     {
-                        "direction": direction,
+                        "after": after,
+                        "before": before,
                         "limit": limit,
-                        "next": next,
-                        "sort": sort,
                     },
                     knowledge_list_params.KnowledgeListParams,
                 ),
@@ -215,6 +236,8 @@ class KnowledgeResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> None:
         """
+        Delete knowledge.
+
         Args:
           extra_headers: Send extra headers
 
@@ -269,7 +292,12 @@ class AsyncKnowledgeResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> Knowledge:
         """
+        Create knowledge which will be learned and leveraged by agents.
+
         Args:
+          files: The files to be uploaded and learned. Supported media types are `pdf`, `json`,
+              `csv`, `text`, `png`, `jpeg`, `excel`, `google sheets`.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -311,6 +339,8 @@ class AsyncKnowledgeResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> Knowledge:
         """
+        Retrieves a knowledge by id.
+
         Args:
           extra_headers: Send extra headers
 
@@ -343,6 +373,8 @@ class AsyncKnowledgeResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> KnowledgeUpdateResponse:
         """
+        Update a knowledge's attributes.
+
         Args:
           extra_headers: Send extra headers
 
@@ -366,19 +398,33 @@ class AsyncKnowledgeResource(AsyncAPIResource):
     def list(
         self,
         *,
-        direction: Literal["asc", "desc"] | NotGiven = NOT_GIVEN,
+        after: str | NotGiven = NOT_GIVEN,
+        before: str | NotGiven = NOT_GIVEN,
         limit: int | NotGiven = NOT_GIVEN,
-        next: str | NotGiven = NOT_GIVEN,
-        sort: Literal["created_at"] | NotGiven = NOT_GIVEN,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
-    ) -> AsyncPaginator[Knowledge, AsyncCursorPage[Knowledge]]:
-        """
+    ) -> AsyncPaginator[Knowledge, AsyncCursorIDPage[Knowledge]]:
+        """Returns the list of knowledge.
+
         Args:
+          after: A cursor to use in pagination.
+
+        `after` is an object ID that defines your place
+              in the list. For example, if you make a list request and receive 100 objects,
+              ending with `obj_foo`, your subsequent call can include `after=obj_foo` to fetch
+              the next page of the list.
+
+          before: A cursor to use in pagination. `before` is an object ID that defines your place
+              in the list. For example, if you make a list request and receive 100 objects,
+              starting with `obj_bar`, your subsequent call can include `before=obj_bar` to
+              fetch the previous page of the list.
+
+          limit: The limit on the number of objects to return, ranging between 1 and 100.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -389,7 +435,7 @@ class AsyncKnowledgeResource(AsyncAPIResource):
         """
         return self._get_api_list(
             "/v1/knowledge",
-            page=AsyncCursorPage[Knowledge],
+            page=AsyncCursorIDPage[Knowledge],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -397,10 +443,9 @@ class AsyncKnowledgeResource(AsyncAPIResource):
                 timeout=timeout,
                 query=maybe_transform(
                     {
-                        "direction": direction,
+                        "after": after,
+                        "before": before,
                         "limit": limit,
-                        "next": next,
-                        "sort": sort,
                     },
                     knowledge_list_params.KnowledgeListParams,
                 ),
@@ -420,6 +465,8 @@ class AsyncKnowledgeResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = NOT_GIVEN,
     ) -> None:
         """
+        Delete knowledge.
+
         Args:
           extra_headers: Send extra headers
 

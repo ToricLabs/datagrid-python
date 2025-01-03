@@ -28,7 +28,6 @@ def pytest_collection_modifyitems(items: list[pytest.Function]) -> None:
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
-bearer_token = "My Bearer Token"
 api_key = "My API Key"
 
 
@@ -38,9 +37,7 @@ def client(request: FixtureRequest) -> Iterator[Datagrid]:
     if not isinstance(strict, bool):
         raise TypeError(f"Unexpected fixture parameter type {type(strict)}, expected {bool}")
 
-    with Datagrid(
-        base_url=base_url, bearer_token=bearer_token, api_key=api_key, _strict_response_validation=strict
-    ) as client:
+    with Datagrid(base_url=base_url, api_key=api_key, _strict_response_validation=strict) as client:
         yield client
 
 
@@ -50,7 +47,5 @@ async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncDatagrid]:
     if not isinstance(strict, bool):
         raise TypeError(f"Unexpected fixture parameter type {type(strict)}, expected {bool}")
 
-    async with AsyncDatagrid(
-        base_url=base_url, bearer_token=bearer_token, api_key=api_key, _strict_response_validation=strict
-    ) as client:
+    async with AsyncDatagrid(base_url=base_url, api_key=api_key, _strict_response_validation=strict) as client:
         yield client
